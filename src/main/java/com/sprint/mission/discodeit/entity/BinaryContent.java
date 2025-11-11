@@ -34,4 +34,8 @@ public class BinaryContent extends BaseEntity {
         this.size = Objects.requireNonNull(size, "File size must not be null");
         this.contentType = Objects.requireNonNull(contentType, "Content type must not be null");
     }
+
+    public void updateStatus(BinaryContentStatus status) {
+        this.status = status;
+    }
 }
