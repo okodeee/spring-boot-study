@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.event.message.BinaryContentCreatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
@@ -19,7 +20,6 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,11 +38,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
-    //
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
     private final BinaryContentRepository binaryContentRepository;
-    private final BinaryContentStorage binaryContentStorage;
+    private final ApplicationEventPublisher eventPublisher;
     private final MessageMapper messageMapper;
     private final PageResponseMapper pageResponseMapper;
 
@@ -67,7 +67,11 @@ public class BasicMessageService implements MessageService {
 
                     BinaryContent binaryContent = new BinaryContent(fileName, (long) bytes.length, contentType);
                     binaryContentRepository.save(binaryContent);
-                    binaryContentStorage.put(binaryContent.getId(), bytes);
+                    eventPublisher.publishEvent(
+                        new BinaryContentCreatedEvent(
+                            binaryContent, binaryContent.getCreatedAt(), bytes
+                        )
+                    );
                     log.info("BinaryContent creation complete: id={}, fileName={}, size={}",
                         binaryContent.getId(), fileName, bytes.length);
                     return binaryContent;
