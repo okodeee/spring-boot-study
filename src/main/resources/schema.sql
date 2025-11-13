@@ -64,6 +64,7 @@ CREATE TABLE read_statuses
     user_id      UUID,
     channel_id   UUID,
     last_read_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    notification_enabled boolean                  NOT NULL,
     UNIQUE (user_id, channel_id)
 );
 
