@@ -156,7 +156,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public Cookie genereateRefreshTokenCookie(String refreshToken) {
+    public Cookie generateRefreshTokenCookie(String refreshToken) {
         // Set refresh token in HttpOnly cookie
         Cookie refreshCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
         refreshCookie.setHttpOnly(true);
@@ -166,7 +166,7 @@ public class JwtTokenProvider {
         return refreshCookie;
     }
 
-    public Cookie genereateRefreshTokenExpirationCookie() {
+    public Cookie generateRefreshTokenExpirationCookie() {
         Cookie refreshCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, "");
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(true); // Use HTTPS in production
