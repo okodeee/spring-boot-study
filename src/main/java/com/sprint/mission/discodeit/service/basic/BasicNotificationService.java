@@ -8,11 +8,13 @@ import com.sprint.mission.discodeit.mapper.NotificationMapper;
 import com.sprint.mission.discodeit.repository.NotificationRepository;
 import com.sprint.mission.discodeit.service.NotificationService;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -48,5 +50,23 @@ public class BasicNotificationService implements NotificationService {
             throw NotificationForbiddenException.withId(notificationId, receiverId);
         }
         notificationRepository.delete(notification);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void create(Set<UUID> receiverIds, String title, String content) {
+        if (receiverIds.isEmpty()) {
+            log.warn("알림 생성 요청이 비어있음: receiverIds={}", receiverIds);
+            return;
+        }
+        log.debug("새 알림 생성 시작: receiverIds={}", receiverIds);
+        List<Notification> notifications = receiverIds.stream()
+            .map(receiverId -> new Notification(
+                receiverId,
+                title,
+                content
+            )).toList();
+        notificationRepository.saveAll(notifications);
+        log.info("새 알림 생성 완료: receiverIds={}", receiverIds);
     }
 } 
