@@ -35,15 +35,22 @@ public class ReadStatus extends BaseUpdatableEntity {
     @Column(name = "last_read_at", columnDefinition = "timestamp with time zone", nullable = false)
     private Instant lastReadAt;
 
+    @Column(nullable = false)
+    private boolean notificationEnabled;
+
     public ReadStatus(User user, Channel channel, Instant lastReadAt) {
         this.user = Objects.requireNonNull(user, "User ID must not be null");
         this.channel = Objects.requireNonNull(channel, "Channel ID must not be null");
         this.lastReadAt = Objects.requireNonNull(lastReadAt, "Last read time must not be null");
+        this.notificationEnabled = channel.getType().equals(ChannelType.PRIVATE);
     }
 
-    public void update(Instant newLastReadAt) {
+    public void update(Instant newLastReadAt, Boolean notificationEnabled) {
         if (newLastReadAt != null && !newLastReadAt.equals(this.lastReadAt)) {
             this.lastReadAt = newLastReadAt;
+        }
+        if (notificationEnabled != null) {
+            this.notificationEnabled = notificationEnabled;
         }
     }
 }
